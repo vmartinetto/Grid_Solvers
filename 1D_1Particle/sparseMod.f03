@@ -14,12 +14,14 @@
           Procedure, Public:: set => sparseVector_set
           Procedure, Public:: print => sparseVector_print
           Procedure, Public:: dot_product => sparse_dense_dot_product
+          Procedure, Public:: dot_product => sparse_sparse_dot_product
       End Type sparseVector
 !
 !     Procedure Interfaces
 !
       Interface dot_product
         module procedure sparse_dense_dot_product
+        module procedure sparse_sparse_dot_product
       End Interface dot_product
 !
 !     Subroutines
@@ -82,12 +84,46 @@
         Integer:: i
 !
         dotProduct = 0
-        Do i = 0,mySV%nDimsparse
+        Do i = 1,mySV%nDimsparse
           dotProduct = dotProduct + mySV%realVector(i)* &
             dVec(mySV%indexVector(i))
         End Do
 !
         Return
       End Function sparse_dense_dot_product
+!
+      Function sparse_sparse_dot_product(mySV1,mySV2) Result(dotProduct)
+!
+!     This function takes the dot_product of two sparse vector objects
+!     that have their indices sorted in order
+!
+        Implicit None
+        Real:: dotProduct
+        Integer:: i, j
+        Class(sparseVector), Intent(In):: mySV1,mySV2
+!
+!     Iterates throught the indices of the sparse vectors checking if
+!     they match, if they do the multiplication is added to the dot
+!     product. If not, the index that is smaller is increased. continues
+!     until one of the vectors has been iterated through.
+!
+        dotProduct = 0
+        i = 1
+        j = 1
+        Do While ((i.le.mySV1%nDimSparse).and.(j.le.mySV1%nDimSparse))
+          If mySV1%indexVector(i).eq.mySV2%indexVector(j) Then
+            dotProduct = dotProduct + mySV1%realVector(i)* &
+              mySV2%realVector(j)
+            i = i + 1
+            j = j + 1
+          Else If (mySV1%indexVector(i).gt.mySV2%indexVector(j)) Then
+            j = j + 1
+          Else
+            i = i + 1
+          End If
+        End Do
+!
+        Return
+      End Function sparse_sparse_dot_product
 !
       End Module sparseMod
