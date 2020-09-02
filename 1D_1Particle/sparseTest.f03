@@ -54,9 +54,8 @@ include "sparseMod.f03"
         Read(*,*) realVec2(i),indexVec2(i)
       End Do
 !
-!     Set up a sparse vector and test the print function
-!
-      Call sparseVec1%set(realVec1,indexVec1,nDimDense)
-      Call sparseVec1%print(header='Vec1= ')
+      Call sparseVec2%set(realVec2,indexVec2,nDimDense)
+      Call sparseVec2%print(header='Vec2= ')
+      Write(*,*) 'sparse sparse dot product:', dot_product(sparseVec1,sparseVec2)
 !
       End Program sparseTest

@@ -13,8 +13,8 @@
         Contains
           Procedure, Public:: set => sparseVector_set
           Procedure, Public:: print => sparseVector_print
-          Procedure, Public:: dot_product => sparse_dense_dot_product
-          Procedure, Public:: dot_product => sparse_sparse_dot_product
+          Procedure, Public:: sddot_product => sparse_dense_dot_product
+          Procedure, Public:: ssdot_product => sparse_sparse_dot_product
       End Type sparseVector
 !
 !     Procedure Interfaces
@@ -111,7 +111,7 @@
         i = 1
         j = 1
         Do While ((i.le.mySV1%nDimSparse).and.(j.le.mySV1%nDimSparse))
-          If mySV1%indexVector(i).eq.mySV2%indexVector(j) Then
+          If (mySV1%indexVector(i).eq.mySV2%indexVector(j)) Then
             dotProduct = dotProduct + mySV1%realVector(i)* &
               mySV2%realVector(j)
             i = i + 1
