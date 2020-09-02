@@ -12,11 +12,15 @@
         Integer:: nDimDense, nDimSparse
         Contains
           Procedure, Public:: set => sparseVector_set
+          Procedure, Public:: print => sparseVector_print
+          Procedure, Public:: dot_product => sparse_dense_dot_product
       End Type sparseVector
 !
 !     Procedure Interfaces
 !
-
+      Interface dot_product
+        module procedure sparse_dense_dot_product
+      End Interface dot_product
 !
 !     Subroutines
 !
@@ -58,12 +62,32 @@
 !
         myiOut = 6
         If(Present(iOut)) myiOut = iOut
-        If(Present(header)) Write(myiOutm,'(A)') Trim(header)
+        If(Present(header)) Write(myiOut,'(A)') Trim(header)
         Do i = 1,mySV%nDimSparse
           Write(myiOut,1000) mySV%indexVector(i),mySV%realVector(i)
         End Do
 !
         Return
       End Subroutine sparseVector_print
+!
+      Function sparse_dense_dot_product(mySV,dVec) Result(dotProduct)
+!
+!     This function does the dot product between a sparse vector object
+!     and a FORTRAN intrinsic dense vector
+!
+        Implicit None
+        Real:: dotProduct
+        Class(sparseVector), Intent(In):: mySV
+        Real, Dimension(:), Intent(In):: dVec
+        Integer:: i
+!
+        dotProduct = 0
+        Do i = 0,mySV%nDimsparse
+          dotProduct = dotProduct + mySV%realVector(i)* &
+            dVec(mySV%indexVector(i))
+        End Do
+!
+        Return
+      End Function sparse_dense_dot_product
 !
       End Module sparseMod
