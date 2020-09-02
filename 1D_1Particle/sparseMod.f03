@@ -126,4 +126,22 @@
         Return
       End Function sparse_sparse_dot_product
 !
+      Function outer_product(vector1,vector2) Result(Matrix)
+!
+!     This function takes the outer product of two FORTRAN intrinsic
+!     vectors one MX1 and the other 1XN and returns the MXN matrix that is produced
+!
+        Implicit None
+        Real, Dimension(:), Intent(In):: vector1, vector2
+        Real, Dimension(:,:), Allocatable:: Matrix
+        Integer:: i
+!
+        Allocate(Matrix(Size(vector1),Size(vector2)))
+        Do i = 1,Size(vector2)
+          Matrix(:,i) = vector1*vector2(i)
+        End Do
+!
+        Return
+      End Function
+!
       End Module sparseMod
