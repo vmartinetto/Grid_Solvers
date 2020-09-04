@@ -24,10 +24,17 @@
         module procedure sparse_sparse_dot_product
       End Interface dot_product
 !
+      Interface outer_product
+        Module Procedure outer_product
+        Module Procedure dense_sparse_outer_product
+      End Interface outer_product
+!
 !     Subroutines
 !
       Contains
-
+!
+!---------------------- VECTOR OPERATIONS -------------------------------
+!
       Subroutine sparseVector_set(mySV,realV,indexV,nDimDense)
 !
 !     This subroutine is used to set up a sparse vector object given
@@ -143,5 +150,52 @@
 !
         Return
       End Function
+!
+      Function dense_sparse_outer_product(vector,mySV) Result(Matrix)
+!
+!     takes the outer product of a dense MX1 FORTRAN column vector and a
+!     sparse 1XN row vector resulting in a MXN semi-sparse Matrix
+!
+        Implicit None
+        Real, Dimension(:,:), Allocatable:: Matrix
+        Real, Dimension(:), Intent(In):: vector
+        Class(sparseVector), Intent(In):: mySV
+        Integer:: i
+!
+        Allocate(Matrix(Size(vector),mySV%nDimDense))
+        Matrix = 0
+        Do i = 1,mySV%nDimSparse
+          Matrix(:,mySV%indexVector(i)) = vector*mySV%realVector(i)
+        End Do
+!
+        Return
+      End Function dense_sparse_outer_product
+!
+!----------------------- MATRIX OPERATIONS -----------------------------
+!
+      Subroutine print_matrix_full_real(amat)
+!
+!     Prints the FORTRAN intrinsic matrix, amat, to the standard output.
+!     the input matrix should be unpacked.
+!
+        Implicit None
+        Real, Dimension(:,:), Intent(In):: amat
+        Integer:: i, j, iFirst, Ilast
+        Integer, Parameter:: iOut=6, nColumns = 5
+!
+1000    Format(1X,A)
+2000    Format(5X,5(7X,I7))
+2010    Format(1X,I7,5F14.6)
+!
+        Do iFirst = 1, Size(amat,2), nColumns
+          iLast = Min(iFirst+nColumns-1,Size(amat,2))
+          Write(iOut,2000) (i, i=iFirst,iLast) ! implied do?
+          Do i = 1, Size(amat,1)
+            Write(iOut,2010) i, (Amat(i,j), j=iFirst , iLast)
+          End Do
+        End Do
+!
+        Return
+        End Subroutine print_matrix_full_real
 !
       End Module sparseMod
