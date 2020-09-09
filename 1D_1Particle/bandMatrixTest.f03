@@ -11,5 +11,6 @@ Include "sparseMod.f03"
 !     Test the set subroutine
 !
       Call bandMat%set1D((/1.0,2.0,3.0/),(/3,3/))
+      Call bandMat%print(header='These are the band')
 !
       End Program bandTest

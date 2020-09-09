@@ -27,6 +27,7 @@
         Contains
           Procedure, Public:: set => bandMatrix_set
           Procedure, Public:: set1D => bandMatrix_oneDiag_set
+          Procedure, Public:: print => bandMatrix_print
       End Type bandMatrix
 !
 !     Procedure Interfaces
@@ -277,6 +278,38 @@
 !
         Return
       End Subroutine bandMatrix_set
+!
+      Subroutine bandMatrix_print(myBM,iOut,header)
+!
+!     Prints out the bands of the band matrix and specifies thir
+!     starting position in the upper left hand corner of the matrix
+!
+        Implicit None
+        Class(bandMatrix), Intent(In):: myBM
+        Integer, Optional, Intent(In):: iOut
+        Character(len=*), Optional, Intent(In):: header
+        Integer:: myiOut, i
+!
+1000    Format(3x,'i=',I4,'j= ',I4,' mat(i,j)= ')
+!
+        myiOut = 6
+        If(Present(iOut)) myiOut = iOut
+        If(Present(header)) Write(myiOut,'(A)') Trim(header)
+        Do i = 1,myBM%nDimSparse(2)
+          If (i.lt.myBM%mainDiagonal) Then
+            Write(myiOut,1000) myBM%mainDiagonal-(i-1),1
+            Write(myiOut,*) myBM%bandDiags(:,i)
+          Else If (i.eq.myBM%mainDiagonal) Then
+            Write(myiOut,1000) 1,1
+            Write(myiOut,*) myBM%bandDiags(:,i)
+          Else
+            Write(myiOut,1000) 1,myBM%mainDiagonal+(i-1)
+            Write(myiOut,*) myBM%bandDiags(:,i)
+          End If
+        End Do
+!
+        Return
+      End Subroutine bandMatrix_print
 !
       Subroutine print_matrix_full_real(amat)
 !
