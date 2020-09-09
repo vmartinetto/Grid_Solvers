@@ -3,6 +3,7 @@
 !     A module for doing sparse linear algebra operations
 !
       Implicit None
+!-------------------------- Types --------------------------------------
 !
 !     define the sparse vector type
 !
@@ -16,6 +17,17 @@
           Procedure, Public:: sddot_product => sparse_dense_dot_product
           Procedure, Public:: ssdot_product => sparse_sparse_dot_product
       End Type sparseVector
+!
+!     Define Band matrix type
+!
+      Type, Public:: bandMatrix
+        Integer, Dimension(2):: nDimDense, nDimSparse
+        Real, Dimension(:,:), Allocatable:: bandDiags
+        Integer:: mainDiagonal
+        Contains
+          Procedure, Public:: set => bandMatrix_set
+          Procedure, Public:: set1D => bandMatrix_oneDiag_set
+      End Type bandMatrix
 !
 !     Procedure Interfaces
 !
@@ -219,6 +231,52 @@
       End Function sparse_sparse_outer_product
 !
 !----------------------- MATRIX OPERATIONS -----------------------------
+!
+      Subroutine bandMatrix_oneDiag_set(myBM,diag,nDimDense)
+!
+!     This subroutine is used to set up a band matrix when the only band
+!     in the matix is along the main diagonal, as such this suboutine
+!     only works for square matrices.
+!
+        Implicit None
+        Class(bandMatrix), Intent(InOut):: myBM
+        Real, Dimension(:), Intent(In):: diag
+        Integer, Dimension(2), Intent(In):: nDimDense
+        Integer:: i
+!
+        myBM%mainDiagonal = 1
+        myBM%nDimDense = nDimDense
+        myBM%nDimSparse = (/Size(diag),1/)
+        Allocate(myBM%bandDiags(myBM%nDimSparse(1),myBM%nDimSparse(2)))
+        Do i = 1,Size(diag)
+          myBM%bandDiags(i,1) = diag(i)
+        End Do
+!
+        Return
+      End Subroutine bandMatrix_oneDiag_set
+!
+      Subroutine bandMatrix_set(myBM,diags,nDimDense,mainpos)
+!     
+!     This subroutine is used to set up a band matrix object given the
+!     diagonals of the band matrix, the position of the main diagonal in
+!     the set of column vectors, and the dimensions of the dense matrix 
+!     as a list of two values, (/rows,columns/). Currently only works for
+!     square matices.
+!
+        Implicit None
+        Integer, Intent(In):: mainpos
+        Class(bandMatrix), Intent(InOut):: myBM
+        Real, Dimension(:,:), Intent(In):: diags
+        Integer, Dimension(2), Intent(In):: nDimDense
+!
+        myBM%mainDiagonal = mainpos
+        myBM%nDimDense = nDimDense
+        myBM%nDimSparse = Shape(diags)
+        Allocate(myBM%bandDiags(myBM%nDimSparse(1),myBM%nDimSparse(2)))
+        myBM%bandDiags = diags
+!
+        Return
+      End Subroutine bandMatrix_set
 !
       Subroutine print_matrix_full_real(amat)
 !
