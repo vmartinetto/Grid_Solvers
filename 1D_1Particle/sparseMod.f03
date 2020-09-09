@@ -27,6 +27,8 @@
       Interface outer_product
         Module Procedure outer_product
         Module Procedure dense_sparse_outer_product
+        Module Procedure sparse_dense_outer_product
+        Module Procedure sparse_sparse_outer_product
       End Interface outer_product
 !
 !     Subroutines
@@ -170,6 +172,51 @@
 !
         Return
       End Function dense_sparse_outer_product
+!
+      Function sparse_dense_outer_product(mySV,vector1) Result(Matrix)
+!
+!     Takes the outer product of MX1 sparse vector object and a 1XN
+!     FORTRAN intrinsic vector returning a resulting MXN Matrix
+!
+        Implicit None
+        Real, Dimension(:,:), Allocatable:: Matrix
+        Real, Dimension(:), Intent(In):: vector1
+        Class(sparseVector), Intent(In):: mySV
+        Integer:: i, j
+!
+        Allocate(Matrix(mySV%nDimDense,Size(vector1)))
+        Matrix = 0
+        Do j = 1,Size(vector1)
+          Do i = 1,mySV%nDimSparse
+            Matrix(mySV%indexVector(i),j) = mySV%realVector(i)* &
+              vector1(j)
+          End Do
+        End Do
+!
+        Return
+      End Function sparse_dense_outer_product
+!
+      Function sparse_sparse_outer_product(mySV1,mySV2) Result(Matrix)
+!
+!     Takes the outer product of a MX1 and a 1XN sparse vector object
+!     and returns the resulting matrix
+!
+        Implicit None
+        Real, Dimension(:,:), Allocatable:: Matrix
+        Class(sparseVector), Intent(In):: mySV1, mySV2
+        Integer:: i, j
+!
+        Allocate(Matrix(mySV1%nDimDense,mySV2%nDimDense))
+        Matrix = 0
+        Do j = 1, mySV1%nDimSparse
+          Do i = 1, mySV2%nDimSparse
+            Matrix(mySV1%indexVector(i),mySV2%indexVector(j)) = &
+              mySV1%realVector(i)*mySV2%realVector(j)
+          End Do
+        End Do
+!
+        Return
+      End Function sparse_sparse_outer_product
 !
 !----------------------- MATRIX OPERATIONS -----------------------------
 !

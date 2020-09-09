@@ -6,13 +6,14 @@ include "sparseMod.f03"
 !     linear algebra module
 !
       Implicit None
-      Type(sparseVector):: sparseVec1
+      Type(sparseVector):: sparseVec1, sparseVec2
       Real, Dimension(3):: vector1, vector2
-      Real, Dimension(3,3):: v1xv2, v2xv1, dsmat
+      Real, Dimension(3,3):: v1xv2, v2xv1, dsmat, sdmat, ssmat
 !
 !     set sparseVectors
 !
       Call sparseVec1%set((/6.0,7.0/),(/1,2/),3)
+      Call sparseVec2%set((/9.0/),(/2/),3)
 !
 !     set the vectors 1 and 2
 !
@@ -36,6 +37,8 @@ include "sparseMod.f03"
 !     do the dense sparse outer product
 !
       dsmat = outer_product(vector2,sparseVec1)
+      sdmat = outer_product(sparseVec1,vector2)
+      ssmat = outer_product(sparseVec1,sparseVec2)
 !
 !     print the dense sparse matrix
 !
@@ -43,5 +46,15 @@ include "sparseMod.f03"
       Call sparseVec1%print(header='sp1= ')
       Write(*,*) 'outer product of vec2 sparse1:'
       Call print_matrix_full_real(dsmat)
+      Write(*,*)
+      Write(*,*) 'outer product of sparse1 vec2:'
+      Call print_matrix_full_real(sdmat)
+      Write(*,*)
+      Write(*,*) 'Sparse Vector 2: '
+      Call sparseVec2%print(header='sp2= ')
+      Write(*,*) 'outer product of sparse1 sparse2:'
+      Call print_matrix_full_real(ssmat)
+
+
 !
       End Program outerTest
