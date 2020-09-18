@@ -28,6 +28,8 @@
           Procedure, Public:: set => bandMatrix_set
           Procedure, Public:: set1D => bandMatrix_oneDiag_set
           Procedure, Public:: print => bandMatrix_print
+          Procedure, Public:: uppersymetricpack => &
+            bandMatrix_upperpackedsymetric
       End Type bandMatrix
 !
 !     Procedure Interfaces
@@ -233,6 +235,14 @@
 !
 !----------------------- MATRIX OPERATIONS -----------------------------
 !
+!
+!     There are alot of assumptions in this band matrix object and it's
+!     functions. First that the main diagonal is always occupied, second
+!     that the matrix is always square, probably more that i can't tink
+!     of.
+!
+!     ,Vincent H. Martinetto
+!
       Subroutine bandMatrix_oneDiag_set(myBM,diag,nDimDense)
 !
 !     This subroutine is used to set up a band matrix when the only band
@@ -290,7 +300,8 @@
         Character(len=*), Optional, Intent(In):: header
         Integer:: myiOut, i
 !
-1000    Format(3x,'i=',I4,'j= ',I4,' mat(i,j)= ')
+1000    Format(3x,' i=',I4,' j= ',I4,' mat(i,j)= ')
+2000    Format(10(1x,F6.3))
 !
         myiOut = 6
         If(Present(iOut)) myiOut = iOut
@@ -298,18 +309,39 @@
         Do i = 1,myBM%nDimSparse(2)
           If (i.lt.myBM%mainDiagonal) Then
             Write(myiOut,1000) myBM%mainDiagonal-(i-1),1
-            Write(myiOut,*) myBM%bandDiags(:,i)
+            Write(myiOut,2000) myBM%bandDiags(:,i)
           Else If (i.eq.myBM%mainDiagonal) Then
             Write(myiOut,1000) 1,1
-            Write(myiOut,*) myBM%bandDiags(:,i)
+            Write(myiOut,2000) myBM%bandDiags(:,i)
           Else
-            Write(myiOut,1000) 1,myBM%mainDiagonal+(i-1)
-            Write(myiOut,*) myBM%bandDiags(:,i)
+            Write(myiOut,1000) 1,(i+1)-myBM%mainDiagonal
+            Write(myiOut,2000) myBM%bandDiags(:,i)
           End If
         End Do
 !
         Return
       End Subroutine bandMatrix_print
+!
+      Function bandMatrix_upperpackedsymetric(myBM) result(upper)
+!
+!     This function takes in a NxN band matrix and returns the upper packed
+!     form of the matrix for use with lapack subroutines.
+!
+        Implicit None
+        Class(bandMatrix), Intent(In):: myBM
+        Real, Dimension(:,:), Allocatable:: upper
+        Integer:: elems, i, pos, j
+!
+        Allocate(upper(myBM%mainDiagonal,myBM%nDimSparse(1)))
+!
+        Do i = 1, myBM%nDimSparse(1)
+          Do j = myBM%mainDiagonal, myBM%nDimSparse(2)
+            upper(myBM%nDimSparse(2)-j+1,i) = myBM%bandDiags(i,j)
+          End Do
+        End Do
+!
+        Return
+      End Function bandMatrix_upperpackedsymetric
 !
       Subroutine print_matrix_full_real(amat)
 !
